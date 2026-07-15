@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SystemVerilog 101</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=212+Baby+Girl&family=Bubble+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #202938;
+      --muted: #667085;
+      --rule: #d7e7f4;
+      --margin-line: #efb7b7;
+      --sidebar-width: 350px;
+      --purple: #6d4aff;
+      --orange: #c87512;
+      --green: #16835f;
+      --blue: #245aa5;
+      --code-ink: #000000;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background-color: #fffefa;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 35px,
+        var(--rule) 36px
+      );
+      font: 24px/1.5 "212 Baby Girl", cursive;
+    }
+
+    #page {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 28px 25px;
+      overflow-y: auto;
+      background: rgba(255, 254, 250, .92);
+    }
+
+    aside::after {
+      content: "";
+      position: absolute;
+      top: 14px;
+      right: 0;
+      width: 3px;
+      height: calc(100% - 28px);
+      border-radius: 50%;
+      background: var(--ink);
+      box-shadow: 2px 0 0 rgba(32, 41, 56, .16), -1px 13px 0 rgba(32, 41, 56, .12);
+      transform: rotate(.25deg);
+    }
+
+    aside h1 {
+      margin: 0 0 22px;
+      font-size: 34px;
+      line-height: 1.1;
+      color: var(--purple);
+    }
+
+    nav a {
+      display: block;
+      margin: 8px 0;
+      color: var(--ink);
+      font-size: 18px;
+      line-height: 1.35;
+      text-decoration: none;
+    }
+
+    nav a:hover,
+    nav a.active {
+      color: var(--purple);
+      transform: translateX(4px);
+    }
+
+    main {
+      width: 100%;
+      max-width: 1250px;
+      padding: 45px clamp(30px, 5vw, 85px) 100px;
+    }
+
+    header { margin-bottom: 45px; }
+    header h1 { margin: 0; font-size: clamp(54px, 6vw, 82px); line-height: 1; }
+    header h1 { color: var(--purple); }
+    header p { margin: 15px 0 0; color: var(--muted); font-size: 28px; }
+
+    section {
+      min-height: 185px;
+      padding: 28px 0 35px;
+      scroll-margin-top: 15px;
+    }
+
+    section h2 {
+      margin: 0 0 12px;
+      font-size: clamp(36px, 4vw, 52px);
+      line-height: 1.05;
+      color: var(--blue);
+    }
+
+    ul {
+      margin: 8px 0;
+      padding-left: 30px;
+      list-style: none;
+    }
+
+    li {
+      position: relative;
+      margin: 5px 0;
+    }
+
+    li::before {
+      content: "-";
+      position: absolute;
+      left: -22px;
+      color: var(--black);
+      font-family: "Bubble Sans", sans-serif;
+      font-weight: 700;
+    }
+
+    h3,
+    h4 {
+      color: var(--green);
+    }
+
+    em,
+    .note {
+      color: var(--orange);
+      font-family: inherit;
+      font-style: italic;
+    }
+
+    code,
+    pre {
+      color: var(--code-ink);
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    code {
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, .06);
+    }
+
+    pre {
+      padding: 18px;
+      overflow-x: auto;
+      border-left: 4px solid var(--code-ink);
+      background: rgba(255, 255, 255, .72);
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(255, 255, 255, .62);
+    }
+
+    th,
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--rule);
+      text-align: left;
+    }
+
+    th { color: var(--blue); }
+
+    .objective { color: var(--ink); font-size: 28px; }
+
+    #menu-button {
+      display: none;
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 3;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    @media (max-width: 850px) {
+      #page { display: block; }
+      #menu-button { display: block; }
+      aside {
+        position: fixed;
+        z-index: 2;
+        width: min(310px, 85vw);
+        transform: translateX(-105%);
+        transition: transform .2s;
+      }
+      body.menu-open aside { transform: translateX(0); }
+      main { padding: 70px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <button id="menu-button" type="button">Contents</button>
+  <div id="page">
+    <aside>
+      <h1 id="sidebar-title"></h1>
+      <nav id="navigation"></nav>
+    </aside>
+
+    <main>
+      <header>
+        <h1 id="page-title"></h1>
+        <p id="subtitle"></p>
+      </header>
+      <div id="content"></div>
+    </main>
+  </div>
+
+  <script src="systemverilog101-content.js"></script>
+  <script>
+    const nav = document.querySelector("#navigation");
+    const content = document.querySelector("#content");
+
+    document.querySelector("#page-title").textContent = course.title;
+    document.querySelector("#sidebar-title").textContent = course.shortTitle;
+    document.querySelector("#subtitle").textContent = course.subtitle;
+
+    const sections = [
+      {
+        id: "objective",
+        title: "Learning Objective",
+        text: course.objective,
+        contentHtml: course.objectiveHtml
+      },
+      ...course.sections
+    ];
+
+    sections.forEach(section => {
+      const link = document.createElement("a");
+      link.href = `#${section.id}`;
+      link.textContent = section.title;
+      nav.append(link);
+
+      const block = document.createElement("section");
+      block.id = section.id;
+      block.innerHTML = `<h2>${section.title}</h2>`;
+
+      if (section.text) {
+        const paragraph = document.createElement("p");
+        paragraph.className = section.id === "objective" ? "objective" : "note";
+        paragraph.textContent = section.text;
+        block.append(paragraph);
+      }
+
+      if (section.topics?.length) {
+        const list = document.createElement("ul");
+        section.topics.forEach(topic => {
+          const item = document.createElement("li");
+          item.innerHTML = topic;
+          list.append(item);
+        });
+        block.append(list);
+      }
+
+      if (section.contentHtml) {
+        const html = section.id === "objective"
+          ? `<div class="objective">${section.contentHtml}</div>`
+          : section.contentHtml;
+        block.insertAdjacentHTML("beforeend", html);
+      }
+
+      content.append(block);
+    });
+
+    const menuButton = document.querySelector("#menu-button");
+    menuButton.addEventListener("click", () => document.body.classList.toggle("menu-open"));
+    nav.addEventListener("click", () => document.body.classList.remove("menu-open"));
+
+    const links = [...nav.querySelectorAll("a")];
+    addEventListener("scroll", () => {
+      let current = sections[0].id;
+      sections.forEach(section => {
+        if (document.querySelector(`#${section.id}`).getBoundingClientRect().top < 160) current = section.id;
+      });
+      links.forEach(link => link.classList.toggle("active", link.hash === `#${current}`));
+    }, { passive: true });
+  </script>
+</body>
+</html>
